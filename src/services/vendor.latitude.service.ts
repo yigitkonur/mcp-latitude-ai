@@ -32,6 +32,27 @@ const serviceLogger = Logger.forContext('services/vendor.latitude.service.ts');
 // Log service initialization
 serviceLogger.debug('Latitude API service initialized');
 
+// API Configuration
+const API_TIMEOUT_MS = 30000; // 30 seconds
+const MAX_RETRIES = 3;
+const RETRYABLE_STATUS_CODES = [429, 502, 503, 504];
+
+/**
+ * Calculate delay for exponential backoff with jitter
+ */
+function getRetryDelay(attempt: number): number {
+	const baseDelay = Math.min(1000 * Math.pow(2, attempt), 10000);
+	const jitter = Math.random() * 500;
+	return baseDelay + jitter;
+}
+
+/**
+ * Check if error is retryable based on status code
+ */
+function isRetryableError(status: number): boolean {
+	return RETRYABLE_STATUS_CODES.includes(status);
+}
+
 /**
  * Get Latitude API credentials from configuration
  */
@@ -70,6 +91,10 @@ async function fetchLatitudeApi<T>(
 	const { apiKey, baseUrl } = getLatitudeCredentials();
 	const url = `${baseUrl}/api/${LATITUDE_API_VERSION}${endpoint}`;
 
+	// Create abort controller for timeout
+	const controller = new AbortController();
+	const timeoutId = setTimeout(() => controller.abort(), API_TIMEOUT_MS);
+
 	const requestOptions: RequestInit = {
 		method: options.method || 'GET',
 		headers: {
@@ -79,95 +104,153 @@ async function fetchLatitudeApi<T>(
 			...options.headers,
 		},
 		body: options.body ? JSON.stringify(options.body) : undefined,
+		signal: controller.signal,
 	};
 
 	methodLogger.debug(`Executing API call: ${requestOptions.method} ${url}`);
 	const startTime = performance.now();
 
-	try {
-		const response = await fetch(url, requestOptions);
-		const endTime = performance.now();
-		const duration = (endTime - startTime).toFixed(2);
+	let lastError: Error | undefined;
+	for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
+		try {
+			if (attempt > 0) {
+				const delay = getRetryDelay(attempt - 1);
+				methodLogger.debug(
+					`Retry attempt ${attempt}/${MAX_RETRIES} after ${delay}ms`,
+				);
+				await new Promise((resolve) => setTimeout(resolve, delay));
+			}
 
-		methodLogger.debug(
-			`API call completed in ${duration}ms with status: ${response.status}`,
-		);
+			const response = await fetch(url, requestOptions);
+			const endTime = performance.now();
+			const duration = (endTime - startTime).toFixed(2);
 
-		if (!response.ok) {
-			const errorText = await response.text();
-			methodLogger.error(
-				`API error response (${response.status}):`,
-				errorText,
+			methodLogger.debug(
+				`API call completed in ${duration}ms with status: ${response.status}`,
 			);
 
-			// Try to parse as Latitude error format
-			let errorData: LatitudeError | undefined;
-			try {
-				const parsed = JSON.parse(errorText);
-				errorData = LatitudeErrorSchema.parse(parsed);
-			} catch {
-				// Not a standard Latitude error format
+			if (!response.ok) {
+				const errorText = await response.text();
+
+				// Retry on transient errors
+				if (
+					isRetryableError(response.status) &&
+					attempt < MAX_RETRIES
+				) {
+					methodLogger.warn(
+						`Retryable error (${response.status}), will retry...`,
+					);
+					lastError = new Error(
+						`HTTP ${response.status}: ${errorText}`,
+					);
+					continue;
+				}
+
+				methodLogger.error(
+					`API error response (${response.status}):`,
+					errorText,
+				);
+
+				// Try to parse as Latitude error format
+				let errorData: LatitudeError | undefined;
+				try {
+					const parsed = JSON.parse(errorText);
+					errorData = LatitudeErrorSchema.parse(parsed);
+				} catch {
+					// Not a standard Latitude error format
+				}
+
+				if (response.status === 401) {
+					throw createAuthInvalidError(
+						errorData?.message ||
+							'Authentication failed. Check your LATITUDE_API_KEY.',
+					);
+				} else if (response.status === 403) {
+					throw createAuthInvalidError(
+						errorData?.message ||
+							'Permission denied for the requested resource.',
+					);
+				} else if (response.status === 404) {
+					throw createApiError(
+						errorData?.message || 'Resource not found.',
+						response.status,
+						errorData || errorText,
+					);
+				} else if (response.status === 422) {
+					throw createApiError(
+						errorData?.message || 'Validation error.',
+						response.status,
+						errorData || errorText,
+					);
+				} else {
+					throw createApiError(
+						errorData?.message ||
+							`API request failed with status ${response.status}`,
+						response.status,
+						errorData || errorText,
+					);
+				}
 			}
 
-			if (response.status === 401) {
-				throw createAuthInvalidError(
-					errorData?.message ||
-						'Authentication failed. Check your LATITUDE_API_KEY.',
-				);
-			} else if (response.status === 403) {
-				throw createAuthInvalidError(
-					errorData?.message ||
-						'Permission denied for the requested resource.',
-				);
-			} else if (response.status === 404) {
+			// Handle empty responses
+			const contentLength = response.headers.get('content-length');
+			if (contentLength === '0' || response.status === 204) {
+				clearTimeout(timeoutId);
+				return {} as T;
+			}
+
+			const responseData = await response.json();
+			clearTimeout(timeoutId);
+			methodLogger.debug('Response body successfully parsed as JSON.');
+			return responseData as T;
+		} catch (error) {
+			// Handle abort/timeout
+			if (error instanceof Error && error.name === 'AbortError') {
+				clearTimeout(timeoutId);
 				throw createApiError(
-					errorData?.message || 'Resource not found.',
-					response.status,
-					errorData || errorText,
-				);
-			} else if (response.status === 422) {
-				throw createApiError(
-					errorData?.message || 'Validation error.',
-					response.status,
-					errorData || errorText,
-				);
-			} else {
-				throw createApiError(
-					errorData?.message ||
-						`API request failed with status ${response.status}`,
-					response.status,
-					errorData || errorText,
+					`API request timed out after ${API_TIMEOUT_MS / 1000}s`,
+					408,
+					error,
 				);
 			}
-		}
 
-		// Handle empty responses
-		const contentLength = response.headers.get('content-length');
-		if (contentLength === '0' || response.status === 204) {
-			return {} as T;
-		}
+			if (error instanceof McpError) {
+				clearTimeout(timeoutId);
+				throw error;
+			}
 
-		const responseData = await response.json();
-		methodLogger.debug('Response body successfully parsed as JSON.');
-		return responseData as T;
-	} catch (error) {
-		if (error instanceof McpError) {
-			throw error;
-		}
+			if (error instanceof TypeError) {
+				// Network errors are retryable
+				if (attempt < MAX_RETRIES) {
+					methodLogger.warn(
+						`Network error, will retry: ${error.message}`,
+					);
+					lastError = error;
+					continue;
+				}
+				clearTimeout(timeoutId);
+				throw createApiError(
+					`Network error during API call: ${error.message}`,
+					undefined,
+					error,
+				);
+			}
 
-		if (error instanceof TypeError) {
-			throw createApiError(
-				`Network error during API call: ${error.message}`,
-				undefined,
+			clearTimeout(timeoutId);
+			throw createUnexpectedError(
+				`Unexpected error during API call: ${error instanceof Error ? error.message : String(error)}`,
 				error,
 			);
 		}
-
-		throw createUnexpectedError(
-			`Unexpected error during API call: ${error instanceof Error ? error.message : String(error)}`,
-			error,
-		);
 	}
+
+	// All retries exhausted
+	clearTimeout(timeoutId);
+	throw createApiError(
+		`API request failed after ${MAX_RETRIES} retries`,
+		503,
+		lastError,
+	);
 }
 
 /**
