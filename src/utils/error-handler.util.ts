@@ -12,8 +12,6 @@ export enum ErrorCode {
 	UNEXPECTED_ERROR = 'UNEXPECTED_ERROR',
 	NETWORK_ERROR = 'NETWORK_ERROR',
 	RATE_LIMIT_ERROR = 'RATE_LIMIT_ERROR',
-	PRIVATE_IP_ERROR = 'PRIVATE_IP_ERROR',
-	RESERVED_RANGE_ERROR = 'RESERVED_RANGE_ERROR',
 }
 
 /**
@@ -112,47 +110,6 @@ export function detectErrorType(
 		statusCode === 429
 	) {
 		return { code: ErrorCode.RATE_LIMIT_ERROR, statusCode: 429 };
-	}
-
-	// ip-api.com specific error detection
-	if (
-		errorMessage.includes('private range') ||
-		errorMessage.includes('private IP')
-	) {
-		return { code: ErrorCode.PRIVATE_IP_ERROR, statusCode: 400 };
-	}
-
-	if (errorMessage.includes('reserved range')) {
-		return { code: ErrorCode.RESERVED_RANGE_ERROR, statusCode: 400 };
-	}
-
-	// Check for ip-api.com status="fail" in originalError
-	if (
-		error instanceof Error &&
-		'originalError' in error &&
-		error.originalError &&
-		typeof error.originalError === 'object'
-	) {
-		const originalError = error.originalError as Record<string, unknown>;
-
-		if (originalError.status === 'fail') {
-			const apiMessage = originalError.message
-				? String(originalError.message)
-				: '';
-
-			if (apiMessage.includes('private')) {
-				return { code: ErrorCode.PRIVATE_IP_ERROR, statusCode: 400 };
-			}
-
-			if (apiMessage.includes('reserved')) {
-				return {
-					code: ErrorCode.RESERVED_RANGE_ERROR,
-					statusCode: 400,
-				};
-			}
-
-			return { code: ErrorCode.VALIDATION_ERROR, statusCode: 400 };
-		}
 	}
 
 	// Not Found detection
@@ -268,14 +225,6 @@ export function createUserFriendlyErrorMessage(
 
 		case ErrorCode.RATE_LIMIT_ERROR:
 			message = `Rate limit exceeded. Please wait a moment and try again, or reduce the frequency of requests.`;
-			break;
-
-		case ErrorCode.PRIVATE_IP_ERROR:
-			message = `Private IP addresses are not supported. Please provide a public IP address.`;
-			break;
-
-		case ErrorCode.RESERVED_RANGE_ERROR:
-			message = `Reserved range IP addresses are not supported. Please provide a public IP address.`;
 			break;
 
 		default:

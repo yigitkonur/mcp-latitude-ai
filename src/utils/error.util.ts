@@ -231,13 +231,11 @@ export function handleCliError(error: unknown): never {
 			);
 		}
 
-		// Add ip-api.com specific context if available
+		// Add API error context if available
 		if (originalError && typeof originalError === 'object') {
 			const origErr = originalError as Record<string, unknown>;
-			if (origErr.status === 'fail' && origErr.message) {
-				console.error(
-					`\nAPI returned failure: ${String(origErr.message)}`,
-				);
+			if (origErr.message) {
+				console.error(`\nAPI error: ${String(origErr.message)}`);
 			}
 		}
 	}
