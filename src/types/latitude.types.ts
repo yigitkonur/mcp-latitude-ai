@@ -263,14 +263,14 @@ export type LatitudeError = z.infer<typeof LatitudeErrorSchema>;
 /**
  * Check if default project ID is configured via environment variable
  */
-export function hasDefaultProjectId(): boolean {
+function hasDefaultProjectId(): boolean {
 	return !!process.env.LATITUDE_PROJECT_ID;
 }
 
 /**
  * Get the default project ID from environment variable
  */
-export function getDefaultProjectId(): string | undefined {
+function getDefaultProjectId(): string | undefined {
 	return process.env.LATITUDE_PROJECT_ID;
 }
 
@@ -318,9 +318,6 @@ export function getListVersionsInputSchema() {
 		projectId: projectIdField(),
 	});
 }
-export const ListVersionsInputSchema = z.object({
-	projectId: z.string().optional().describe('Project ID'),
-});
 
 export function getGetVersionInputSchema() {
 	return z.object({
@@ -328,10 +325,6 @@ export function getGetVersionInputSchema() {
 		versionUuid: z.string().describe('Version UUID'),
 	});
 }
-export const GetVersionInputSchema = z.object({
-	projectId: z.string().optional().describe('Project ID'),
-	versionUuid: z.string().describe('Version UUID'),
-});
 
 export function getCreateVersionInputSchema() {
 	return z.object({
@@ -339,10 +332,6 @@ export function getCreateVersionInputSchema() {
 		name: z.string().describe('Version/commit name'),
 	});
 }
-export const CreateVersionInputSchema = z.object({
-	projectId: z.string().optional().describe('Project ID'),
-	name: z.string().describe('Version/commit name'),
-});
 
 export function getPublishVersionInputSchema() {
 	return z.object({
@@ -352,12 +341,6 @@ export function getPublishVersionInputSchema() {
 		description: z.string().optional().describe('Publication description'),
 	});
 }
-export const PublishVersionInputSchema = z.object({
-	projectId: z.string().optional().describe('Project ID'),
-	versionUuid: z.string().describe('Version UUID to publish'),
-	title: z.string().optional().describe('Publication title'),
-	description: z.string().optional().describe('Publication description'),
-});
 
 // Document/Prompt tools
 export function getListPromptsInputSchema() {
@@ -369,13 +352,6 @@ export function getListPromptsInputSchema() {
 			.describe("Version UUID or 'live' for published version"),
 	});
 }
-export const ListPromptsInputSchema = z.object({
-	projectId: z.string().optional().describe('Project ID'),
-	versionUuid: z
-		.string()
-		.default('live')
-		.describe("Version UUID or 'live' for published version"),
-});
 
 export function getGetPromptInputSchema() {
 	return z.object({
@@ -386,13 +362,6 @@ export function getGetPromptInputSchema() {
 			.describe("Prompt path (e.g., '/my-prompt' or 'folder/prompt')"),
 	});
 }
-export const GetPromptInputSchema = z.object({
-	projectId: z.string().optional().describe('Project ID'),
-	versionUuid: z.string().default('live').describe("Version UUID or 'live'"),
-	path: z
-		.string()
-		.describe("Prompt path (e.g., '/my-prompt' or 'folder/prompt')"),
-});
 
 export function getPushPromptInputSchema() {
 	return z.object({
@@ -405,15 +374,6 @@ export function getPushPromptInputSchema() {
 		force: z.boolean().default(false).describe('Force overwrite if exists'),
 	});
 }
-export const PushPromptInputSchema = z.object({
-	projectId: z.string().optional().describe('Project ID'),
-	versionUuid: z
-		.string()
-		.describe("Target version UUID (must be draft, not 'live')"),
-	path: z.string().describe('Prompt path'),
-	content: z.string().describe('Prompt content in PromptL format'),
-	force: z.boolean().default(false).describe('Force overwrite if exists'),
-});
 
 export function getPushPromptFromFileInputSchema() {
 	return z.object({
@@ -433,22 +393,6 @@ export function getPushPromptFromFileInputSchema() {
 		force: z.boolean().default(false).describe('Force overwrite if exists'),
 	});
 }
-export const PushPromptFromFileInputSchema = z.object({
-	projectId: z.string().optional().describe('Project ID'),
-	versionUuid: z
-		.string()
-		.describe("Target version UUID (must be draft, not 'live')"),
-	filePath: z
-		.string()
-		.describe('Absolute path to the prompt file (e.g., /path/to/my-prompt.md)'),
-	promptPath: z
-		.string()
-		.optional()
-		.describe(
-			"Optional: Prompt path in Latitude. If omitted, derived from filename (e.g., 'my-prompt.md' → 'my-prompt')",
-		),
-	force: z.boolean().default(false).describe('Force overwrite if exists'),
-});
 
 export function getRunPromptInputSchema() {
 	return z.object({
@@ -464,18 +408,6 @@ export function getRunPromptInputSchema() {
 		userMessage: z.string().optional().describe('Additional user message'),
 	});
 }
-export const RunPromptInputSchema = z.object({
-	projectId: z.string().optional().describe('Project ID'),
-	versionUuid: z.string().default('live').describe("Version UUID or 'live'"),
-	path: z.string().describe('Prompt path to run'),
-	parameters: z
-		.record(z.string(), z.unknown())
-		.optional()
-		.describe('Prompt parameters as key-value pairs'),
-	stream: z.boolean().default(false).describe('Enable streaming response'),
-	tools: z.array(z.string()).optional().describe('Tool names to enable'),
-	userMessage: z.string().optional().describe('Additional user message'),
-});
 
 export function getPushChangesInputSchema() {
 	return z.object({
@@ -495,22 +427,6 @@ export function getPushChangesInputSchema() {
 			.describe('Array of document changes'),
 	});
 }
-export const PushChangesInputSchema = z.object({
-	projectId: z.string().optional().describe('Project ID'),
-	versionUuid: z.string().describe('Target version UUID'),
-	changes: z
-		.array(
-			z.object({
-				path: z.string().describe('Document path'),
-				content: z.string().describe('Document content'),
-				status: z
-					.enum(['added', 'modified', 'deleted'])
-					.default('modified')
-					.describe('Change status'),
-			}),
-		)
-		.describe('Array of document changes'),
-});
 
 // Conversation tools
 export const ChatInputSchema = z.object({
@@ -545,19 +461,6 @@ export function getCreateLogInputSchema() {
 			.describe('Conversation messages to log'),
 	});
 }
-export const CreateLogInputSchema = z.object({
-	projectId: z.string().optional().describe('Project ID'),
-	versionUuid: z.string().describe('Version UUID'),
-	path: z.string().describe('Prompt path'),
-	messages: z
-		.array(
-			z.object({
-				role: z.enum(['system', 'user', 'assistant']),
-				content: z.string(),
-			}),
-		)
-		.describe('Conversation messages to log'),
-});
 
 // ============================================================================
 // API Response wrapper

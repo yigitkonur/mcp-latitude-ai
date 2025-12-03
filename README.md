@@ -731,7 +731,29 @@ latitude-mcp chat <conversationUuid> -m "Follow up question"
 | Variable | Required | Default | Description |
 |----------|----------|---------|-------------|
 | `LATITUDE_API_KEY` | Yes | — | Your Latitude API key |
+| `LATITUDE_PROJECT_ID` | No | — | Default project ID (skip `projectId` in all tools) |
 | `LATITUDE_BASE_URL` | No | `https://gateway.latitude.so` | API base URL |
+
+### Skip `projectId` with Default Project
+
+Set `LATITUDE_PROJECT_ID` to avoid specifying `projectId` in every tool call:
+
+```json
+{
+  "mcpServers": {
+    "latitude": {
+      "command": "npx",
+      "args": ["latitude-mcp-server"],
+      "env": {
+        "LATITUDE_API_KEY": "your-api-key",
+        "LATITUDE_PROJECT_ID": "27756"
+      }
+    }
+  }
+}
+```
+
+When set, all tools that require `projectId` will use this default. You can still override per-call.
 
 ---
 

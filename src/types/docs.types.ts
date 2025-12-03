@@ -58,27 +58,19 @@ export const GetDocsInputSchema = z.object({
   - techniques: Few-shot, Chain-of-Thought, Tree-of-Thoughts, Role prompting`),
 });
 
-export type GetDocsInput = z.infer<typeof GetDocsInputSchema>;
-
 // ============================================================================
 // Response Types
 // ============================================================================
 
 /**
- * Metadata returned with documentation
+ * All available documentation topics with metadata
  */
-export interface DocsMetadata {
-	topic: DocsTopic;
+export const DOCS_TOPIC_METADATA: Record<DocsTopic, {
 	title: string;
 	description: string;
 	relatedTopics: DocsTopic[];
 	suggestedTools: string[];
-}
-
-/**
- * All available documentation topics with metadata
- */
-export const DOCS_TOPIC_METADATA: Record<DocsTopic, Omit<DocsMetadata, 'topic'>> = {
+}> = {
 	overview: {
 		title: 'PromptL Overview',
 		description: 'Introduction to PromptL and Latitude prompt management',

@@ -126,7 +126,7 @@ Call \`latitude_get_docs\` with one of these topics:
 // TOPIC: OVERVIEW
 // ============================================================================
 
-export const DOCS_OVERVIEW = `# PromptL Overview
+const DOCS_OVERVIEW = `# PromptL Overview
 
 > The prompt templating language for Latitude.so
 
@@ -207,7 +207,7 @@ Conditionals (\`if/else\`) and loops (\`for/each\`) for dynamic prompts.
 // TOPIC: STRUCTURE
 // ============================================================================
 
-export const DOCS_STRUCTURE = `# Prompt Structure
+const DOCS_STRUCTURE = `# Prompt Structure
 
 > Config section + Messages = Complete prompt
 
@@ -366,7 +366,7 @@ Be concise but informative. Always ask clarifying questions.
 // TOPIC: VARIABLES
 // ============================================================================
 
-export const DOCS_VARIABLES = `# Variables & Expressions
+const DOCS_VARIABLES = `# Variables & Expressions
 
 > Dynamic content with \`{{ }}\` syntax
 
@@ -538,7 +538,7 @@ You are a {{ formality }} assistant that responds in {{ language }}.
 // TOPIC: CONDITIONALS
 // ============================================================================
 
-export const DOCS_CONDITIONALS = `# Conditional Statements
+const DOCS_CONDITIONALS = `# Conditional Statements
 
 > Dynamic content based on conditions with \`if/else/endif\`
 
@@ -742,7 +742,7 @@ Debug: role={{ role }}, isPremium={{ isPremium }}
 // TOPIC: LOOPS
 // ============================================================================
 
-export const DOCS_LOOPS = `# Loops & Iteration
+const DOCS_LOOPS = `# Loops & Iteration
 
 > Repeat content with \`for/each\` over arrays
 
@@ -943,7 +943,7 @@ Item {{ index + 1 }} of {{ items.length }}: {{ item }}
 // TOPIC: REFERENCES
 // ============================================================================
 
-export const DOCS_REFERENCES = `# Prompt References
+const DOCS_REFERENCES = `# Prompt References
 
 > Include and chain prompts with \`<prompt>\` tag
 
@@ -1086,7 +1086,7 @@ model: gpt-4o
 // TOPIC: TOOLS
 // ============================================================================
 
-export const DOCS_TOOLS = `# Tool Use & Function Calling
+const DOCS_TOOLS = `# Tool Use & Function Calling
 
 > Enable AI to call external functions
 
@@ -1325,7 +1325,7 @@ tools:
 // TOPIC: CHAINS
 // ============================================================================
 
-export const DOCS_CHAINS = `# Chains & Multi-Step Prompts
+const DOCS_CHAINS = `# Chains & Multi-Step Prompts
 
 > Sequential reasoning with \`<step>\` tags
 
@@ -1565,7 +1565,7 @@ Analyze the implications and provide insights.
 // TOPIC: AGENTS
 // ============================================================================
 
-export const DOCS_AGENTS = `# Multi-Agent Systems
+const DOCS_AGENTS = `# Multi-Agent Systems
 
 > Orchestrate multiple AI agents for complex tasks
 
@@ -1813,7 +1813,7 @@ tools:
 // TOPIC: TECHNIQUES
 // ============================================================================
 
-export const DOCS_TECHNIQUES = `# Prompting Techniques
+const DOCS_TECHNIQUES = `# Prompting Techniques
 
 > Few-shot, Chain-of-Thought, Tree-of-Thoughts, Role Prompting
 
@@ -2121,17 +2121,3 @@ export const DOCS_MAP: Record<DocsTopic, string> = {
 	techniques: DOCS_TECHNIQUES,
 };
 
-export default {
-	HELP_CONTENT,
-	DOCS_MAP,
-	DOCS_OVERVIEW,
-	DOCS_STRUCTURE,
-	DOCS_VARIABLES,
-	DOCS_CONDITIONALS,
-	DOCS_LOOPS,
-	DOCS_REFERENCES,
-	DOCS_TOOLS,
-	DOCS_CHAINS,
-	DOCS_AGENTS,
-	DOCS_TECHNIQUES,
-};
