@@ -1,0 +1,136 @@
+{
+  "mcpServers": {
+    "playbook-repo": {
+      "name": "playbook-repo",
+      "command": "uv",
+      "args": [
+        "run",
+        "--directory",
+        "/Users/christopherhay/chris-source/chuk-ai/mcp-servers/chuk-mcp-playbook",
+        "chuk-mcp-playbook"
+      ],
+      "env": {
+        "PATH": "/Users/yigitkonur/.cache/uv/archive-v0/KKO7Dne5fMe4VqxGHPCDJ/bin:/Users/yigitkonur/.nvm/versions/node/v20.19.6/bin:/Users/yigitkonur/.antigravity/antigravity/bin:/Users/yigitkonur/.codeium/windsurf/bin:/Users/yigitkonur/.codeium/windsurf/bin:/Users/yigitkonur/.opencode/bin:/Users/yigitkonur/.deno/bin:/Users/yigitkonur/.codeium/windsurf/bin:/opt/homebrew/opt/libpq/bin:/Users/yigitkonur/.local/share/zinit/polaris/bin:/opt/homebrew/bin:/opt/homebrew/sbin:/usr/local/bin:/System/Cryptexes/App/usr/bin:/usr/bin:/bin:/usr/sbin:/sbin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/local/bin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/bin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/appleinternal/bin:/Library/Apple/usr/bin:/Users/yigitkonur/.cargo/bin:/Applications/Warp.app/Contents/Resources/bin",
+        "PYTHONWARNINGS": "ignore",
+        "LOG_LEVEL": "WARNING",
+        "CHUK_LOG_LEVEL": "WARNING",
+        "MCP_LOG_LEVEL": "WARNING"
+      }
+    },
+    "sqlite": {
+      "name": "sqlite",
+      "command": "uvx",
+      "args": [
+        "mcp-server-sqlite",
+        "--db-path",
+        "test.db"
+      ],
+      "env": {
+        "PATH": "/Users/yigitkonur/.cache/uv/archive-v0/KKO7Dne5fMe4VqxGHPCDJ/bin:/Users/yigitkonur/.nvm/versions/node/v20.19.6/bin:/Users/yigitkonur/.antigravity/antigravity/bin:/Users/yigitkonur/.codeium/windsurf/bin:/Users/yigitkonur/.codeium/windsurf/bin:/Users/yigitkonur/.opencode/bin:/Users/yigitkonur/.deno/bin:/Users/yigitkonur/.codeium/windsurf/bin:/opt/homebrew/opt/libpq/bin:/Users/yigitkonur/.local/share/zinit/polaris/bin:/opt/homebrew/bin:/opt/homebrew/sbin:/usr/local/bin:/System/Cryptexes/App/usr/bin:/usr/bin:/bin:/usr/sbin:/sbin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/local/bin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/bin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/appleinternal/bin:/Library/Apple/usr/bin:/Users/yigitkonur/.cargo/bin:/Applications/Warp.app/Contents/Resources/bin",
+        "PYTHONWARNINGS": "ignore",
+        "LOG_LEVEL": "WARNING",
+        "CHUK_LOG_LEVEL": "WARNING",
+        "MCP_LOG_LEVEL": "WARNING"
+      }
+    },
+    "echo": {
+      "name": "echo",
+      "command": "uvx",
+      "args": [
+        "chuk-mcp-echo",
+        "stdio"
+      ],
+      "env": {
+        "PATH": "/Users/yigitkonur/.cache/uv/archive-v0/KKO7Dne5fMe4VqxGHPCDJ/bin:/Users/yigitkonur/.nvm/versions/node/v20.19.6/bin:/Users/yigitkonur/.antigravity/antigravity/bin:/Users/yigitkonur/.codeium/windsurf/bin:/Users/yigitkonur/.codeium/windsurf/bin:/Users/yigitkonur/.opencode/bin:/Users/yigitkonur/.deno/bin:/Users/yigitkonur/.codeium/windsurf/bin:/opt/homebrew/opt/libpq/bin:/Users/yigitkonur/.local/share/zinit/polaris/bin:/opt/homebrew/bin:/opt/homebrew/sbin:/usr/local/bin:/System/Cryptexes/App/usr/bin:/usr/bin:/bin:/usr/sbin:/sbin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/local/bin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/bin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/appleinternal/bin:/Library/Apple/usr/bin:/Users/yigitkonur/.cargo/bin:/Applications/Warp.app/Contents/Resources/bin",
+        "PYTHONWARNINGS": "ignore",
+        "LOG_LEVEL": "WARNING",
+        "CHUK_LOG_LEVEL": "WARNING",
+        "MCP_LOG_LEVEL": "WARNING"
+      }
+    },
+    "notion": {
+      "name": "notion",
+      "env": {
+        "PATH": "/Users/yigitkonur/.cache/uv/archive-v0/KKO7Dne5fMe4VqxGHPCDJ/bin:/Users/yigitkonur/.nvm/versions/node/v20.19.6/bin:/Users/yigitkonur/.antigravity/antigravity/bin:/Users/yigitkonur/.codeium/windsurf/bin:/Users/yigitkonur/.codeium/windsurf/bin:/Users/yigitkonur/.opencode/bin:/Users/yigitkonur/.deno/bin:/Users/yigitkonur/.codeium/windsurf/bin:/opt/homebrew/opt/libpq/bin:/Users/yigitkonur/.local/share/zinit/polaris/bin:/opt/homebrew/bin:/opt/homebrew/sbin:/usr/local/bin:/System/Cryptexes/App/usr/bin:/usr/bin:/bin:/usr/sbin:/sbin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/local/bin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/bin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/appleinternal/bin:/Library/Apple/usr/bin:/Users/yigitkonur/.cargo/bin:/Applications/Warp.app/Contents/Resources/bin"
+      },
+      "url": "https://mcp.notion.com/mcp"
+    },
+    "cloudflare_workers": {
+      "name": "cloudflare_workers",
+      "env": {
+        "PATH": "/Users/yigitkonur/.cache/uv/archive-v0/KKO7Dne5fMe4VqxGHPCDJ/bin:/Users/yigitkonur/.nvm/versions/node/v20.19.6/bin:/Users/yigitkonur/.antigravity/antigravity/bin:/Users/yigitkonur/.codeium/windsurf/bin:/Users/yigitkonur/.codeium/windsurf/bin:/Users/yigitkonur/.opencode/bin:/Users/yigitkonur/.deno/bin:/Users/yigitkonur/.codeium/windsurf/bin:/opt/homebrew/opt/libpq/bin:/Users/yigitkonur/.local/share/zinit/polaris/bin:/opt/homebrew/bin:/opt/homebrew/sbin:/usr/local/bin:/System/Cryptexes/App/usr/bin:/usr/bin:/bin:/usr/sbin:/sbin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/local/bin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/bin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/appleinternal/bin:/Library/Apple/usr/bin:/Users/yigitkonur/.cargo/bin:/Applications/Warp.app/Contents/Resources/bin"
+      },
+      "url": "https://bindings.mcp.cloudflare.com/mcp"
+    },
+    "brave_search": {
+      "name": "brave_search",
+      "command": "npx",
+      "args": [
+        "-y",
+        "@brave/brave-search-mcp-server"
+      ],
+      "env": {
+        "BRAVE_API_KEY": "${TOKEN:bearer:brave_search}",
+        "PATH": "/Users/yigitkonur/.cache/uv/archive-v0/KKO7Dne5fMe4VqxGHPCDJ/bin:/Users/yigitkonur/.nvm/versions/node/v20.19.6/bin:/Users/yigitkonur/.antigravity/antigravity/bin:/Users/yigitkonur/.codeium/windsurf/bin:/Users/yigitkonur/.codeium/windsurf/bin:/Users/yigitkonur/.opencode/bin:/Users/yigitkonur/.deno/bin:/Users/yigitkonur/.codeium/windsurf/bin:/opt/homebrew/opt/libpq/bin:/Users/yigitkonur/.local/share/zinit/polaris/bin:/opt/homebrew/bin:/opt/homebrew/sbin:/usr/local/bin:/System/Cryptexes/App/usr/bin:/usr/bin:/bin:/usr/sbin:/sbin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/local/bin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/bin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/appleinternal/bin:/Library/Apple/usr/bin:/Users/yigitkonur/.cargo/bin:/Applications/Warp.app/Contents/Resources/bin",
+        "PYTHONWARNINGS": "ignore",
+        "LOG_LEVEL": "WARNING",
+        "CHUK_LOG_LEVEL": "WARNING",
+        "MCP_LOG_LEVEL": "WARNING"
+      }
+    },
+    "monday": {
+      "name": "monday",
+      "env": {
+        "PATH": "/Users/yigitkonur/.cache/uv/archive-v0/KKO7Dne5fMe4VqxGHPCDJ/bin:/Users/yigitkonur/.nvm/versions/node/v20.19.6/bin:/Users/yigitkonur/.antigravity/antigravity/bin:/Users/yigitkonur/.codeium/windsurf/bin:/Users/yigitkonur/.codeium/windsurf/bin:/Users/yigitkonur/.opencode/bin:/Users/yigitkonur/.deno/bin:/Users/yigitkonur/.codeium/windsurf/bin:/opt/homebrew/opt/libpq/bin:/Users/yigitkonur/.local/share/zinit/polaris/bin:/opt/homebrew/bin:/opt/homebrew/sbin:/usr/local/bin:/System/Cryptexes/App/usr/bin:/usr/bin:/bin:/usr/sbin:/sbin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/local/bin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/bin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/appleinternal/bin:/Library/Apple/usr/bin:/Users/yigitkonur/.cargo/bin:/Applications/Warp.app/Contents/Resources/bin"
+      },
+      "url": "https://mcp.monday.com/mcp"
+    },
+    "playwright": {
+      "name": "playwright",
+      "command": "npx",
+      "args": [
+        "@playwright/mcp@latest"
+      ],
+      "env": {
+        "PATH": "/Users/yigitkonur/.cache/uv/archive-v0/KKO7Dne5fMe4VqxGHPCDJ/bin:/Users/yigitkonur/.nvm/versions/node/v20.19.6/bin:/Users/yigitkonur/.antigravity/antigravity/bin:/Users/yigitkonur/.codeium/windsurf/bin:/Users/yigitkonur/.codeium/windsurf/bin:/Users/yigitkonur/.opencode/bin:/Users/yigitkonur/.deno/bin:/Users/yigitkonur/.codeium/windsurf/bin:/opt/homebrew/opt/libpq/bin:/Users/yigitkonur/.local/share/zinit/polaris/bin:/opt/homebrew/bin:/opt/homebrew/sbin:/usr/local/bin:/System/Cryptexes/App/usr/bin:/usr/bin:/bin:/usr/sbin:/sbin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/local/bin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/bin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/appleinternal/bin:/Library/Apple/usr/bin:/Users/yigitkonur/.cargo/bin:/Applications/Warp.app/Contents/Resources/bin",
+        "PYTHONWARNINGS": "ignore",
+        "LOG_LEVEL": "WARNING",
+        "CHUK_LOG_LEVEL": "WARNING",
+        "MCP_LOG_LEVEL": "WARNING"
+      }
+    },
+    "linkedin": {
+      "name": "linkedin",
+      "env": {
+        "PATH": "/Users/yigitkonur/.cache/uv/archive-v0/KKO7Dne5fMe4VqxGHPCDJ/bin:/Users/yigitkonur/.nvm/versions/node/v20.19.6/bin:/Users/yigitkonur/.antigravity/antigravity/bin:/Users/yigitkonur/.codeium/windsurf/bin:/Users/yigitkonur/.codeium/windsurf/bin:/Users/yigitkonur/.opencode/bin:/Users/yigitkonur/.deno/bin:/Users/yigitkonur/.codeium/windsurf/bin:/opt/homebrew/opt/libpq/bin:/Users/yigitkonur/.local/share/zinit/polaris/bin:/opt/homebrew/bin:/opt/homebrew/sbin:/usr/local/bin:/System/Cryptexes/App/usr/bin:/usr/bin:/bin:/usr/sbin:/sbin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/local/bin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/bin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/appleinternal/bin:/Library/Apple/usr/bin:/Users/yigitkonur/.cargo/bin:/Applications/Warp.app/Contents/Resources/bin"
+      },
+      "url": "https://linkedin.chukai.io/mcp"
+    },
+    "weather": {
+      "name": "weather",
+      "env": {
+        "PATH": "/Users/yigitkonur/.cache/uv/archive-v0/KKO7Dne5fMe4VqxGHPCDJ/bin:/Users/yigitkonur/.nvm/versions/node/v20.19.6/bin:/Users/yigitkonur/.antigravity/antigravity/bin:/Users/yigitkonur/.codeium/windsurf/bin:/Users/yigitkonur/.codeium/windsurf/bin:/Users/yigitkonur/.opencode/bin:/Users/yigitkonur/.deno/bin:/Users/yigitkonur/.codeium/windsurf/bin:/opt/homebrew/opt/libpq/bin:/Users/yigitkonur/.local/share/zinit/polaris/bin:/opt/homebrew/bin:/opt/homebrew/sbin:/usr/local/bin:/System/Cryptexes/App/usr/bin:/usr/bin:/bin:/usr/sbin:/sbin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/local/bin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/bin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/appleinternal/bin:/Library/Apple/usr/bin:/Users/yigitkonur/.cargo/bin:/Applications/Warp.app/Contents/Resources/bin"
+      },
+      "url": "https://weather.chukai.io/mcp"
+    },
+    "telnet": {
+      "name": "telnet",
+      "command": "uvx",
+      "args": [
+        "chuk-mcp-telnet-client"
+      ],
+      "env": {
+        "PATH": "/Users/yigitkonur/.cache/uv/archive-v0/KKO7Dne5fMe4VqxGHPCDJ/bin:/Users/yigitkonur/.nvm/versions/node/v20.19.6/bin:/Users/yigitkonur/.antigravity/antigravity/bin:/Users/yigitkonur/.codeium/windsurf/bin:/Users/yigitkonur/.codeium/windsurf/bin:/Users/yigitkonur/.opencode/bin:/Users/yigitkonur/.deno/bin:/Users/yigitkonur/.codeium/windsurf/bin:/opt/homebrew/opt/libpq/bin:/Users/yigitkonur/.local/share/zinit/polaris/bin:/opt/homebrew/bin:/opt/homebrew/sbin:/usr/local/bin:/System/Cryptexes/App/usr/bin:/usr/bin:/bin:/usr/sbin:/sbin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/local/bin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/bin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/appleinternal/bin:/Library/Apple/usr/bin:/Users/yigitkonur/.cargo/bin:/Applications/Warp.app/Contents/Resources/bin",
+        "PYTHONWARNINGS": "ignore",
+        "LOG_LEVEL": "WARNING",
+        "CHUK_LOG_LEVEL": "WARNING",
+        "MCP_LOG_LEVEL": "WARNING"
+      }
+    }
+  },
+  "defaultProvider": "openai",
+  "defaultModel": "gpt-4",
+  "theme": "default",
+  "verbose": true,
+  "confirmTools": true
+}

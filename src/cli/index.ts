@@ -2,16 +2,16 @@ import { Command } from 'commander';
 import { Logger } from '../utils/logger.util.js';
 import { VERSION, CLI_NAME } from '../utils/constants.util.js';
 
-import ipAddressCli from './ipaddress.cli.js';
+import latitudeCli from './latitude.cli.js';
 
 /**
- * CLI entry point for the Boilerplate MCP Server
+ * CLI entry point for the Latitude MCP Server
  * Handles command registration, parsing, and execution
  */
 
 // Package description
 const DESCRIPTION =
-	'A boilerplate Model Context Protocol (MCP) server implementation using TypeScript';
+	'MCP server for Latitude prompt management - manage prompts, versions, and run AI conversations';
 
 /**
  * Run the CLI with the provided arguments
@@ -29,7 +29,7 @@ export async function runCli(args: string[]) {
 
 	// Register CLI commands
 	cliLogger.debug('Registering CLI commands...');
-	ipAddressCli.register(program);
+	latitudeCli.register(program);
 	cliLogger.debug('CLI commands registered successfully');
 
 	// Handle unknown commands

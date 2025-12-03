@@ -11,8 +11,8 @@ import express from 'express';
 import cors from 'cors';
 
 // Import tools and resources
-import ipAddressTools from './tools/ipaddress.tool.js';
-import ipAddressResources from './resources/ipaddress.resource.js';
+import latitudeTools from './tools/latitude.tool.js';
+import latitudeResources from './resources/latitude.resource.js';
 
 const logger = Logger.forContext('index.ts');
 
@@ -41,7 +41,7 @@ export async function startServer(
 		serverLogger.debug('Debug mode enabled');
 	}
 
-	serverLogger.info(`Initializing Boilerplate MCP server v${VERSION}`);
+	serverLogger.info(`Initializing Latitude MCP server v${VERSION}`);
 	serverInstance = new McpServer({
 		name: PACKAGE_NAME,
 		version: VERSION,
@@ -49,9 +49,9 @@ export async function startServer(
 
 	// Register tools and resources
 	serverLogger.info('Registering MCP tools and resources...');
-	ipAddressTools.registerTools(serverInstance);
-	ipAddressResources.registerResources(serverInstance);
-	serverLogger.debug('All tools and resources registered');
+	latitudeTools.registerTools(serverInstance);
+	latitudeResources.registerResources(serverInstance);
+	serverLogger.debug('All Latitude tools and resources registered');
 
 	if (mode === 'stdio') {
 		serverLogger.info('Using STDIO transport');
@@ -108,7 +108,7 @@ export async function startServer(
 
 		// Health check endpoint
 		app.get('/', (_req: Request, res: Response) => {
-			res.send(`Boilerplate MCP Server v${VERSION} is running`);
+			res.send(`Latitude MCP Server v${VERSION} is running`);
 		});
 
 		// Start HTTP server

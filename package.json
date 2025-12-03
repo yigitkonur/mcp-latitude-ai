@@ -1,16 +1,16 @@
 {
-	"name": "@aashari/boilerplate-mcp-server",
-	"version": "1.16.1",
-	"description": "TypeScript MCP server boilerplate with STDIO and HTTP transport support, CLI tools, and extensible architecture",
+	"name": "@anthropic/latitude-mcp-server",
+	"version": "1.0.0",
+	"description": "MCP server for Latitude prompt management - manage prompts, versions, and run AI conversations",
 	"main": "dist/index.js",
 	"types": "dist/index.d.ts",
 	"type": "commonjs",
 	"repository": {
 		"type": "git",
-		"url": "https://github.com/aashari/boilerplate-mcp-server.git"
+		"url": "https://github.com/anthropic/latitude-mcp-server.git"
 	},
 	"bin": {
-		"mcp-server": "./dist/index.js"
+		"latitude-mcp": "./dist/index.js"
 	},
 	"scripts": {
 		"build": "tsc",
@@ -32,17 +32,15 @@
 	"keywords": [
 		"mcp",
 		"model-context-protocol",
+		"latitude",
+		"prompt-management",
+		"ai",
+		"llm",
 		"typescript",
 		"claude",
 		"anthropic",
-		"ai",
-		"llm",
-		"boilerplate",
-		"server",
-		"stdio",
-		"http",
-		"streamable",
-		"cli",
+		"prompts",
+		"version-control",
 		"mcp-server"
 	],
 	"author": "Andi Ashari",
