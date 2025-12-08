@@ -317,34 +317,52 @@ Download prompts to local files.
 
 **Returns:** List of created files
 
-### replace_prompt({ name, content })
+### replace_prompt({ name?, content?, filePath? })
 
-Replace or create a single prompt.
+Replace or create a single prompt. **Shows all available prompts in description.**
 
-**Parameters:**
+**Parameters (choose one approach):**
+
+**Option A - Direct content:**
 - `name` (string) - Prompt name
 - `content` (string) - Full PromptL content
 
-**Returns:** Success confirmation
+**Option B - From file:**
+- `filePath` (string) - Path to `.promptl` file (name auto-detected from filename)
+- `name` (string, optional) - Override name from filename
 
-### append_prompts({ prompts, overwrite? })
+**Returns:** Success confirmation + updated list of all LIVE prompts
+
+### append_prompts({ prompts?, filePaths?, overwrite? })
 
 Add prompts without removing existing ones.
 
-**Parameters:**
+**Parameters (choose one approach):**
+
+**Option A - Direct content:**
 - `prompts` (array) - Array of `{ name, content }`
+
+**Option B - From files:**
+- `filePaths` (array) - Array of paths to `.promptl` files
+
+**Common:**
 - `overwrite` (boolean, optional) - Overwrite existing (default: false)
 
-**Returns:** Success confirmation
+**Returns:** Success confirmation + updated list of all LIVE prompts
 
-### push_prompts({ prompts })
+### push_prompts({ prompts?, filePaths? })
 
 ⚠️ **Destructive:** Replaces ALL prompts in LIVE.
 
-**Parameters:**
+**Parameters (choose one approach):**
+
+**Option A - Direct content:**
 - `prompts` (array) - Array of `{ name, content }`
 
-**Returns:** Success confirmation
+**Option B - From files:**
+- `filePaths` (array) - Array of paths to `.promptl` files
+
+**Returns:** Success confirmation + updated list of all LIVE prompts
 
 ### docs({ action, topic?, query? })
 
@@ -361,18 +379,22 @@ Get documentation.
 
 ## Examples
 
-### Example 1: Pull and Edit Workflow
+### Example 1: Pull → Edit → Push Workflow (Recommended)
 
 ```javascript
-// 1. Pull all prompts
-pull_prompts({ outputDir: "./my-prompts" })
+// 1. Pull all prompts to local files
+pull_prompts({ outputDir: "./prompts" })
+// Creates: ./prompts/my-prompt.promptl, ./prompts/other-prompt.promptl, etc.
 
-// 2. Edit locally in ./my-prompts/*.promptl
+// 2. Edit files locally in your IDE
 
-// 3. Push back
-replace_prompt({
-  name: "my-prompt",
-  content: fs.readFileSync("./my-prompts/my-prompt.promptl", "utf8")
+// 3. Push single file back (name auto-detected from filename)
+replace_prompt({ filePath: "./prompts/my-prompt.promptl" })
+
+// 4. Or push multiple files
+append_prompts({ 
+  filePaths: ["./prompts/prompt-a.promptl", "./prompts/prompt-b.promptl"],
+  overwrite: true 
 })
 ```
 
