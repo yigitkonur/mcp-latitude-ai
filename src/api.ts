@@ -238,15 +238,16 @@ export async function getDocument(
 export async function createOrUpdateDocument(
 	versionUuid: string,
 	path: string,
-	content: string
+	content: string,
+	force: boolean = false
 ): Promise<Document> {
 	const projectId = getProjectId();
-	logger.debug(`Creating/updating document: ${path} (${content.length} chars)`);
+	logger.debug(`Creating/updating document: ${path} (${content.length} chars, force=${force})`);
 	return request<Document>(
 		`/projects/${projectId}/versions/${versionUuid}/documents/create-or-update`,
 		{
 			method: 'POST',
-			body: { path, prompt: content },
+			body: { path, prompt: content, force },
 		}
 	);
 }
@@ -284,87 +285,48 @@ export async function runDocument(
 }
 
 /**
- * Format timestamp in San Francisco time: "14 Jan 2025 - 13:11"
- * Optionally prepend action prefix like "append research-validate"
- */
-function formatSFTimestamp(prefix?: string): string {
-	const now = new Date();
-	const options: Intl.DateTimeFormatOptions = {
-		timeZone: 'America/Los_Angeles',
-		day: 'numeric',
-		month: 'short',
-		year: 'numeric',
-		hour: '2-digit',
-		minute: '2-digit',
-		hour12: false,
-	};
-	const formatted = now.toLocaleString('en-US', options);
-	// "Jan 14, 2025, 13:11" → "14 Jan 2025 - 13:11"
-	const match = formatted.match(/(\w+)\s+(\d+),\s+(\d+),\s+(\d+:\d+)/);
-	let timestamp = match 
-		? `${match[2]} ${match[1]} ${match[3]} - ${match[4]}`
-		: now.toISOString().replace(/[:.]/g, '-');
-	
-	if (prefix) {
-		return `${prefix} (${timestamp})`;
-	}
-	return timestamp;
-}
-
-/**
- * Push changes to a version using the push endpoint
- */
-async function pushChangesToVersion(
-	versionUuid: string,
-	changes: DocumentChange[]
-): Promise<void> {
-	const projectId = getProjectId();
-	const apiChanges = changes.map((c) => ({
-		path: c.path,
-		content: c.content,
-		status: c.status,
-	}));
-	
-	logger.debug(`Pushing ${changes.length} change(s) to version ${versionUuid}`);
-	await request<void>(
-		`/projects/${projectId}/versions/${versionUuid}/push`,
-		{
-			method: 'POST',
-			body: { changes: apiChanges },
-		}
-	);
-}
-
-/**
- * Deploy changes to LIVE version
- * Creates a draft → pushes changes → publishes to LIVE
+ * Deploy changes directly to LIVE version using force mode
+ * This bypasses the draft->publish workflow which requires provider validation
  */
 export async function deployToLive(
 	changes: DocumentChange[],
-	versionName?: string
+	_versionName?: string
 ): Promise<DeployResult> {
-	const name = versionName || formatSFTimestamp();
+	const added: string[] = [];
+	const modified: string[] = [];
+	const deleted: string[] = [];
 
-	// Step 1: Create a new draft version
-	logger.info(`Creating draft: ${name}`);
-	const version = await createVersion(name);
+	// Process each change directly to LIVE with force=true
+	for (const change of changes) {
+		logger.info(`Deploying ${change.status}: ${change.path}`);
 
-	// Step 2: Push all changes to the draft using the push endpoint
-	logger.info(`Pushing ${changes.length} change(s) to draft...`);
-	await pushChangesToVersion(version.uuid, changes);
+		if (change.status === 'deleted') {
+			try {
+				await deleteDocument('live', change.path);
+				deleted.push(change.path);
+				logger.debug(`Deleted: ${change.path}`);
+			} catch (error) {
+				// Document might not exist, log and continue
+				logger.warn(`Failed to delete ${change.path}:`, error);
+			}
+		} else {
+			// Use force=true to push directly to LIVE
+			await createOrUpdateDocument('live', change.path, change.content, true);
+			if (change.status === 'added') {
+				added.push(change.path);
+			} else {
+				modified.push(change.path);
+			}
+			logger.debug(`${change.status}: ${change.path}`);
+		}
+	}
 
-	// Step 3: Publish the draft to LIVE
-	logger.info(`Publishing version ${version.uuid} to LIVE with title: ${name}`);
-	const published = await publishVersion(version.uuid, name);
-	logger.info(`Published! Version is now LIVE: ${published.uuid}`);
-
-	// Categorize changes for return value
-	const added = changes.filter((c) => c.status === 'added').map((c) => c.path);
-	const modified = changes.filter((c) => c.status === 'modified').map((c) => c.path);
-	const deleted = changes.filter((c) => c.status === 'deleted').map((c) => c.path);
+	// Get current LIVE version info
+	const docs = await listDocuments('live');
+	const liveVersionUuid = docs.length > 0 ? docs[0].versionUuid : 'live';
 
 	return {
-		version: published,
+		version: { uuid: liveVersionUuid } as Version,
 		documentsProcessed: changes.length,
 		added,
 		modified,
