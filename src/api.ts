@@ -203,12 +203,14 @@ export async function createVersion(name: string): Promise<Version> {
 	});
 }
 
-export async function publishVersion(versionUuid: string): Promise<Version> {
+export async function publishVersion(versionUuid: string, title?: string): Promise<Version> {
 	const projectId = getProjectId();
+	logger.debug(`Publishing version ${versionUuid} with title: ${title || '(none)'}`);
 	return request<Version>(
 		`/projects/${projectId}/versions/${versionUuid}/publish`,
 		{
 			method: 'POST',
+			body: title ? { title } : {},
 		}
 	);
 }
@@ -239,6 +241,7 @@ export async function createOrUpdateDocument(
 	content: string
 ): Promise<Document> {
 	const projectId = getProjectId();
+	logger.debug(`Creating/updating document: ${path} (${content.length} chars)`);
 	return request<Document>(
 		`/projects/${projectId}/versions/${versionUuid}/documents/create-or-update`,
 		{
@@ -347,8 +350,8 @@ export async function deployToLive(
 		}
 	}
 
-	logger.info(`Publishing version ${version.uuid} to LIVE...`);
-	const published = await publishVersion(version.uuid);
+	logger.info(`Publishing version ${version.uuid} to LIVE with title: ${name}`);
+	const published = await publishVersion(version.uuid, name);
 	logger.info(`Published! Version is now LIVE: ${published.uuid}`);
 
 	return {
