@@ -31,6 +31,7 @@ export interface Document {
 	uuid: string;
 	path: string;
 	content: string;
+	contentHash?: string;
 	config?: Record<string, unknown>;
 	parameters?: Record<string, unknown>;
 }

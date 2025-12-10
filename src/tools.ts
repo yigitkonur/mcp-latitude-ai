@@ -31,7 +31,9 @@ import {
 	runDocument,
 	deployToLive,
 	computeDiff,
+	normalizePath,
 	validatePromptLContent,
+	computeContentHash,
 	type ValidationIssue,
 } from './api.js';
 import { getHelp, getDocs, findDocs } from './docs.js';
@@ -56,7 +58,9 @@ const CACHE_TTL_MS = 30000; // 30 seconds
 async function refreshPromptCache(): Promise<string[]> {
 	try {
 		const docs = await listDocuments('live');
-		cachedPromptNames = docs.map((d: { path: string }) => d.path);
+		cachedPromptNames = docs.map((d) => d.path);
+		// Also cache full documents for variable extraction (avoids extra API calls)
+		cachedDocuments = docs.map((d) => ({ path: d.path, content: d.content }));
 		cacheLastUpdated = new Date();
 		logger.debug(`Cache updated: ${cachedPromptNames.length} prompts`);
 		return cachedPromptNames;
@@ -170,10 +174,15 @@ function extractVariables(content: string): string[] {
 	return Array.from(variables);
 }
 
+// Cache for full documents (path + content) to avoid repeated API calls
+let cachedDocuments: Array<{ path: string; content: string }> = [];
+
 /**
  * Build dynamic description for run_prompt with prompt names and their variables
+ * Uses cached documents to avoid individual API calls per prompt
  */
 async function buildRunPromptDescription(): Promise<string> {
+	// Use cached documents if available, otherwise just show names
 	const names = await getCachedPromptNames();
 	
 	let desc = 'Execute a prompt with parameters.';
@@ -185,18 +194,20 @@ async function buildRunPromptDescription(): Promise<string> {
 	
 	desc += `\n\n**Available prompts (${names.length}):**`;
 	
-	// Fetch each prompt to get its variables (limit to avoid too long description)
+	// Use cached documents for variable extraction (no extra API calls)
 	const maxToShow = Math.min(names.length, 10);
+	const docMap = new Map(cachedDocuments.map(d => [d.path, d.content]));
+	
 	for (let i = 0; i < maxToShow; i++) {
-		try {
-			const doc = await getDocument(names[i], 'live');
-			const vars = extractVariables(doc.content);
+		const content = docMap.get(names[i]);
+		if (content) {
+			const vars = extractVariables(content);
 			if (vars.length > 0) {
 				desc += `\n- \`${names[i]}\` (params: ${vars.map(v => `\`${v}\``).join(', ')})`;
 			} else {
 				desc += `\n- \`${names[i]}\` (no params)`;
 			}
-		} catch {
+		} else {
 			desc += `\n- \`${names[i]}\``;
 		}
 	}
@@ -443,10 +454,11 @@ async function handlePushPrompts(args: {
 		const deleted = changes.filter((c: DocumentChange) => c.status === 'deleted');
 
 		if (changes.length === 0) {
-			const newNames = await forceRefreshAndGetNames();
+			// No changes - reuse existingDocs instead of another API call
+			const currentNames = existingDocs.map(d => d.path);
 			return formatSuccess('No Changes Needed', 
 				`All ${prompts.length} prompt(s) are already up to date.\n\n` +
-				`**Current LIVE prompts (${newNames.length}):** ${newNames.map(n => `\`${n}\``).join(', ')}`
+				`**Current LIVE prompts (${currentNames.length}):** ${currentNames.map(n => `\`${n}\``).join(', ')}`
 			);
 		}
 
@@ -544,26 +556,34 @@ async function handleAddPrompt(args: {
 		}
 		logger.info(`All ${prompts.length} prompt(s) passed validation`);
 
-		// Get existing prompts
+		// Get existing prompts (includes contentHash for fast comparison)
 		const existingDocs = await listDocuments('live');
-		const existingMap = new Map(existingDocs.map((d) => [d.path, d]));
+		// Use NORMALIZED paths as keys for reliable matching (handles /path vs path inconsistencies)
+		// Map to { path, contentHash } for fast hash-based comparison
+		const existingMap = new Map(
+			existingDocs.map((d) => [normalizePath(d.path), { path: d.path, contentHash: d.contentHash }])
+		);
 
 		// Build changes - ALWAYS overwrite if exists, add if new, NEVER delete
+		// Uses hash comparison for speed (avoids comparing 100KB+ content strings)
 		const changes: DocumentChange[] = [];
 
 		for (const prompt of prompts) {
-			const existingDoc = existingMap.get(prompt.name);
+			const normalizedName = normalizePath(prompt.name);
+			const existingDoc = existingMap.get(normalizedName);
 
 			if (existingDoc) {
-				// Only include if content is different
-				if (existingDoc.content !== prompt.content) {
+				// Compare hashes instead of full content (much faster)
+				const localHash = computeContentHash(prompt.content);
+				if (existingDoc.contentHash !== localHash) {
+					// Use the EXISTING path from API to ensure compatibility
 					changes.push({
-						path: prompt.name,
+						path: existingDoc.path,
 						content: prompt.content,
 						status: 'modified',
 					});
 				}
-				// If same content, skip silently (unchanged)
+				// If same hash, skip silently (unchanged)
 			} else {
 				// New prompt
 				changes.push({
@@ -579,10 +599,11 @@ async function handleAddPrompt(args: {
 		const modified = changes.filter((c: DocumentChange) => c.status === 'modified');
 
 		if (changes.length === 0) {
-			const newNames = await forceRefreshAndGetNames();
+			// No changes - reuse existingDocs instead of another API call
+			const currentNames = existingDocs.map(d => d.path);
 			return formatSuccess('No Changes Needed', 
 				`All ${prompts.length} prompt(s) are already up to date.\n\n` +
-				`**Current LIVE prompts (${newNames.length}):** ${newNames.map(n => `\`${n}\``).join(', ')}`
+				`**Current LIVE prompts (${currentNames.length}):** ${currentNames.map(n => `\`${n}\``).join(', ')}`
 			);
 		}
 
@@ -647,21 +668,20 @@ async function handlePullPrompts(args: {
 			unlinkSync(join(outputDir, file));
 		}
 
-		// Get all prompts from LIVE
+		// Get all prompts from LIVE (includes full content)
 		const docs = await listDocuments('live');
 
 		if (docs.length === 0) {
 			return formatSuccess('No Prompts to Pull', 'The project has no prompts.');
 		}
 
-		// Fetch full content and write files
+		// Write files directly - listDocuments already returns full content
 		const written: string[] = [];
 		for (const doc of docs) {
-			const fullDoc = await getDocument(doc.path, 'live');
 			const filename = `${doc.path.replace(/\//g, '_')}.promptl`;
 			const filepath = join(outputDir, filename);
 
-			writeFileSync(filepath, fullDoc.content, 'utf-8');
+			writeFileSync(filepath, doc.content, 'utf-8');
 			written.push(filename);
 		}
 

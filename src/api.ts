@@ -12,6 +12,7 @@
  * - POST /projects/:id/versions/:uuid/documents/run - run document
  */
 
+import { createHash } from 'crypto';
 import { Logger } from './utils/logger.util.js';
 import { config } from './utils/config.util.js';
 import type {
@@ -345,6 +346,13 @@ export async function listDocuments(
 	);
 }
 
+/**
+ * Compute SHA-256 hash of content (matches Latitude's contentHash)
+ */
+export function computeContentHash(content: string): string {
+	return createHash('sha256').update(content).digest('hex');
+}
+
 export async function getDocument(
 	path: string,
 	versionUuid: string = 'live'
@@ -365,8 +373,12 @@ interface PushResponse {
 }
 
 /**
- * Push changes to a version in a single batch
- * This is the CLI-style push that sends all changes at once
+ * Push changes to a version
+ * 
+ * IMPORTANT: The Latitude API /push endpoint has a bug where 'modified' status
+ * fails with "A document with the same path already exists" error for inherited
+ * documents in drafts. Workaround: for modified docs, we first delete then add
+ * in sequential push calls.
  */
 export async function pushChanges(
 	versionUuid: string,
@@ -374,39 +386,104 @@ export async function pushChanges(
 ): Promise<PushResponse> {
 	const projectId = getProjectId();
 	
-	// Format changes for the API
-	const apiChanges = changes.map((c) => ({
+	// Separate changes by type
+	const modified = changes.filter((c) => c.status === 'modified');
+	const nonModified = changes.filter((c) => c.status !== 'modified');
+	
+	let totalProcessed = 0;
+	
+	// Step 1: If there are modified docs, delete them first
+	if (modified.length > 0) {
+		const deleteChanges = modified.map((c) => ({
+			path: c.path,
+			content: '',
+			status: 'deleted' as const,
+		}));
+		
+		logger.info(`Deleting ${modified.length} modified doc(s) before re-adding...`);
+		
+		await request<PushResponse>(
+			`/projects/${projectId}/versions/${versionUuid}/push`,
+			{
+				method: 'POST',
+				body: { changes: deleteChanges },
+			}
+		);
+	}
+	
+	// Step 2: Push all adds (including modified-as-add) and deletes
+	const addChanges = modified.map((c) => ({
+		path: c.path,
+		content: c.content || '',
+		status: 'added' as const,
+	}));
+	
+	const otherChanges = nonModified.map((c) => ({
 		path: c.path,
 		content: c.content || '',
 		status: c.status,
 	}));
 	
-	logger.info(`Pushing ${changes.length} change(s) to version ${versionUuid}`);
+	const allChanges = [...addChanges, ...otherChanges];
 	
-	return request<PushResponse>(
-		`/projects/${projectId}/versions/${versionUuid}/push`,
-		{
-			method: 'POST',
-			body: { changes: apiChanges },
-		}
-	);
+	if (allChanges.length > 0) {
+		logger.info(`Pushing ${allChanges.length} change(s) to version ${versionUuid}`);
+		
+		const result = await request<PushResponse>(
+			`/projects/${projectId}/versions/${versionUuid}/push`,
+			{
+				method: 'POST',
+				body: { changes: allChanges },
+			}
+		);
+		
+		totalProcessed = result.documentsProcessed;
+	}
+	
+	return {
+		versionUuid,
+		documentsProcessed: totalProcessed || changes.length,
+	};
+}
+
+/**
+ * Normalize document path for consistent comparison.
+ * Handles leading/trailing slashes, whitespace, and ensures consistent format.
+ * API may return paths with or without leading slash - this normalizes them.
+ */
+export function normalizePath(path: string): string {
+	return path
+		.trim()
+		.replace(/^\/+/, '')  // Remove leading slashes
+		.replace(/\/+$/, '')  // Remove trailing slashes
+		.replace(/\/+/g, '/'); // Collapse multiple slashes
 }
 
 /**
  * Compute diff between incoming prompts and existing prompts
  * Returns only the changes that need to be made
+ * 
+ * IMPORTANT: Uses normalized paths and content hashes for fast comparison.
+ * Handles API inconsistencies where paths may have leading slashes.
  */
 export function computeDiff(
 	incoming: Array<{ path: string; content: string }>,
 	existing: Document[]
 ): DocumentChange[] {
 	const changes: DocumentChange[] = [];
-	const existingMap = new Map(existing.map((d) => [d.path, d]));
-	const incomingPaths = new Set(incoming.map((p) => p.path));
+	
+	// Build map with NORMALIZED paths as keys, storing path + contentHash for fast comparison
+	const existingMap = new Map(
+		existing.map((d) => [normalizePath(d.path), { path: d.path, contentHash: d.contentHash }])
+	);
+	const incomingPaths = new Set(
+		incoming.map((p) => normalizePath(p.path))
+	);
 
 	// Check each incoming prompt
 	for (const prompt of incoming) {
-		const existingDoc = existingMap.get(prompt.path);
+		const normalizedPath = normalizePath(prompt.path);
+		const existingDoc = existingMap.get(normalizedPath);
 		
 		if (!existingDoc) {
 			// New prompt
@@ -415,22 +492,26 @@ export function computeDiff(
 				content: prompt.content,
 				status: 'added',
 			});
-		} else if (existingDoc.content !== prompt.content) {
-			// Modified prompt
-			changes.push({
-				path: prompt.path,
-				content: prompt.content,
-				status: 'modified',
-			});
+		} else {
+			// Compare hashes for speed (avoid comparing large content strings)
+			const localHash = computeContentHash(prompt.content);
+			if (existingDoc.contentHash !== localHash) {
+				// Modified prompt - use the EXISTING path to ensure API compatibility
+				changes.push({
+					path: existingDoc.path,
+					content: prompt.content,
+					status: 'modified',
+				});
+			}
 		}
-		// If content is same, no change needed (don't include in changes)
+		// If same hash, no change needed (don't include in changes)
 	}
 
 	// Check for deleted prompts (exist remotely but not in incoming)
-	for (const path of existingMap.keys()) {
-		if (!incomingPaths.has(path)) {
+	for (const [normalizedExistingPath, doc] of existingMap.entries()) {
+		if (!incomingPaths.has(normalizedExistingPath)) {
 			changes.push({
-				path,
+				path: doc.path,
 				content: '',
 				status: 'deleted',
 			});
