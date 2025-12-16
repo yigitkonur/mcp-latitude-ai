@@ -673,7 +673,9 @@ async function handleAddPrompt(args: {
 		if (existsSync(tempDir)) {
 			try {
 				rmSync(tempDir, { recursive: true, force: true });
-			} catch {}
+			} catch {
+				// Ignore cleanup errors - temp dir will be cleaned by OS
+			}
 		}
 	}
 }
