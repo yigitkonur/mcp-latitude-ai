@@ -16,7 +16,7 @@
   },
   "scripts": {
     "build": "tsc",
-    "prepare": "npm run build && node scripts/ensure-executable.js",
+    "prepare": "pnpm build && node scripts/ensure-executable.js",
     "postinstall": "node scripts/ensure-executable.js",
     "clean": "rm -rf dist coverage",
     "test": "jest",
@@ -24,15 +24,15 @@
     "lint": "eslint src --ext .ts --config eslint.config.mjs",
     "update:deps": "npx npm-check-updates -u && npm install --legacy-peer-deps",
     "format": "prettier --write 'src/**/*.ts' 'scripts/**/*.js'",
-    "cli": "npm run build && node dist/index.js",
+    "cli": "pnpm build && node dist/index.js",
     "version:patch": "npm version patch",
     "version:minor": "npm version minor",
     "version:major": "npm version major",
-    "mcp:stdio": "npm run build && TRANSPORT_MODE=stdio node dist/index.js",
-    "mcp:http": "npm run build && TRANSPORT_MODE=http node dist/index.js",
-    "mcp:inspect": "npm run build && (TRANSPORT_MODE=http node dist/index.js &) && sleep 2 && npx @modelcontextprotocol/inspector http://localhost:3000/mcp",
-    "dev:stdio": "npm run build && npx @modelcontextprotocol/inspector -e TRANSPORT_MODE=stdio -e DEBUG=true node dist/index.js",
-    "dev:http": "npm run build && DEBUG=true TRANSPORT_MODE=http node dist/index.js"
+    "mcp:stdio": "pnpm build && TRANSPORT_MODE=stdio node dist/index.js",
+    "mcp:http": "pnpm build && TRANSPORT_MODE=http node dist/index.js",
+    "mcp:inspect": "pnpm build && (TRANSPORT_MODE=http node dist/index.js &) && sleep 2 && npx @modelcontextprotocol/inspector http://localhost:3000/mcp",
+    "dev:stdio": "pnpm build && npx @modelcontextprotocol/inspector -e TRANSPORT_MODE=stdio -e DEBUG=true node dist/index.js",
+    "dev:http": "pnpm build && DEBUG=true TRANSPORT_MODE=http node dist/index.js"
   },
   "keywords": [
     "mcp",
