@@ -16,7 +16,7 @@ const logger = Logger.forContext('server.ts');
 // ============================================================================
 
 const SERVER_NAME = 'mcp-latitude-prompts';
-const SERVER_VERSION = '3.1.0';
+const SERVER_VERSION = '4.0.6';
 
 // ============================================================================
 // Server Instance
