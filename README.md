@@ -1,10 +1,10 @@
 MCP server that bridges your AI assistant to [Latitude.so](https://latitude.so) prompt management. list, read, run, push, and pull PromptL prompts — all from inside a conversation. like prompt DevOps without leaving your editor.
 
 ```bash
-npx mcp-latitude-ai
+npx mcp-latitude-prompts
 ```
 
-[![npm](https://img.shields.io/npm/v/mcp-latitude-ai.svg?style=flat-square)](https://www.npmjs.com/package/mcp-latitude-ai)
+[![npm](https://img.shields.io/npm/v/mcp-latitude-prompts.svg?style=flat-square)](https://www.npmjs.com/package/mcp-latitude-prompts)
 [![node](https://img.shields.io/badge/node-18+-93450a.svg?style=flat-square)](https://nodejs.org/)
 [![license](https://img.shields.io/badge/license-MIT-grey.svg?style=flat-square)](https://opensource.org/licenses/MIT)
 
@@ -34,20 +34,20 @@ npx mcp-latitude-ai
 ## install
 
 ```bash
-npm install -g mcp-latitude-ai
+npm install -g mcp-latitude-prompts
 ```
 
 or just run it directly:
 
 ```bash
-npx mcp-latitude-ai
+npx mcp-latitude-prompts
 ```
 
 or build from source:
 
 ```bash
-git clone https://github.com/yigitkonur/mcp-latitude-ai.git
-cd mcp-latitude-ai
+git clone https://github.com/yigitkonur/mcp-latitude-prompts.git
+cd mcp-latitude-prompts
 pnpm install && pnpm build
 ```
 
@@ -93,7 +93,7 @@ add to your MCP client config:
   "mcpServers": {
     "latitude": {
       "command": "npx",
-      "args": ["-y", "mcp-latitude-ai"],
+      "args": ["-y", "mcp-latitude-prompts"],
       "env": {
         "LATITUDE_API_KEY": "your-api-key",
         "LATITUDE_PROJECT_ID": "your-project-id"
