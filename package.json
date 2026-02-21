@@ -1,5 +1,5 @@
 {
-  "name": "mcp-latitude-ai",
+  "name": "mcp-latitude-prompts",
   "version": "4.0.6",
   "description": "Simplified MCP server for Latitude.so prompt management - 8 focused tools for push, pull, run, and manage prompts",
   "main": "dist/index.js",
@@ -7,10 +7,10 @@
   "type": "commonjs",
   "repository": {
     "type": "git",
-    "url": "https://github.com/yigitkonur/mcp-latitude-ai.git"
+    "url": "https://github.com/yigitkonur/mcp-latitude-prompts.git"
   },
   "bin": {
-    "mcp-latitude-ai": "./dist/index.js",
+    "mcp-latitude-prompts": "./dist/index.js",
     "latitude-mcp": "./dist/index.js",
     "latitude-mcp-server": "./dist/index.js"
   },

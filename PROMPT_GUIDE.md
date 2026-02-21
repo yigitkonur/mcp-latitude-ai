@@ -184,7 +184,7 @@ Available prompts (10): email-extractor, sentiment, cover-letter, ...
 # Test single prompt
 npx @modelcontextprotocol/inspector \
   -e LATITUDE_API_KEY=$KEY -e LATITUDE_PROJECT_ID=$ID \
-  --cli npx -y latitude-mcp-server@3.2.1 \
+  --cli npx -y mcp-latitude-prompts@3.2.1 \
   --method tools/call \
   --tool-name run_prompt \
   --tool-arg name=email-extractor \
@@ -194,7 +194,7 @@ npx @modelcontextprotocol/inspector \
 for p in email-extractor sentiment classifier; do
   echo "=== $p ===" && npx @modelcontextprotocol/inspector \
     -e LATITUDE_API_KEY=$KEY -e LATITUDE_PROJECT_ID=$ID \
-    --cli npx -y latitude-mcp-server@3.2.1 \
+    --cli npx -y mcp-latitude-prompts@3.2.1 \
     --method tools/call --tool-name run_prompt \
     --tool-arg name=$p --tool-arg 'parameters={"text":"test"}'
 done

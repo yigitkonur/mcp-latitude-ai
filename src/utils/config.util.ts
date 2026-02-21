@@ -99,9 +99,9 @@ class ConfigLoader {
 
 			// Determine the potential keys for the current package
 			const shortKey = 'latitude'; // Project-specific short key
-			const fullPackageName = this.packageName; // e.g., '@anthropic/latitude-mcp-server'
+			const fullPackageName = this.packageName; // e.g., 'mcp-latitude-prompts'
 			const unscopedPackageName =
-				fullPackageName.split('/')[1] || fullPackageName; // e.g., 'latitude-mcp-server'
+				fullPackageName.split('/')[1] || fullPackageName; // e.g., 'mcp-latitude-prompts'
 
 			const potentialKeys = [
 				shortKey,
@@ -177,4 +177,4 @@ class ConfigLoader {
 }
 
 // Create and export a singleton instance with the package name from package.json
-export const config = new ConfigLoader('@anthropic/latitude-mcp-server');
+export const config = new ConfigLoader('mcp-latitude-prompts');
